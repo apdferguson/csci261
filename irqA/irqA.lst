@@ -1,0 +1,63 @@
+M68HC11 GAS  irqA.s 			page 1
+
+
+   1                 	;============================================-=
+   2                 	; File:
+   3                 	       .file "irqA.s" 
+   4                 	; Behaviour: 
+   5                 	;      Store in COUNT the  number of IRQs interrupts generated.
+   6                 	; Assumptions:
+   7                 	;      none
+   8                 	; Board:
+   9                 	;      CME11-E9-EVBU (with the PW link HACK)
+  10                 	; Author:
+  11                 	;      Peter Walsh
+  12                 	;============================================-=
+  13                 	
+  14                 	;----------------------------------------------
+  15                 	;            Text Section (code)
+  16                 	;----------------------------------------------
+  17                 	.sect .text
+  18                 	.global _start
+  19                 	
+  20                 	;---------------------------------------------
+  21                 	; Behaviour: 
+  22                 	;    Interrupt Service Routine
+  23                 	;    Store in COUNT the number of times this routine is invoked.
+  24                 	; Assumptions:
+  25                 	;    none
+  26                 	; Restriction:
+  27                 	;    none
+  28                 	; Register and Memory Usage:
+  29                 	;    Precondition:
+  30                 	;    Postcondition:
+  31                 	;       COUNT is incremented by 1
+  32                 	;    Destroys:
+  33                 	;       none
+  34                 	;---------------------------------------------
+  35                 	irqCount:
+  36 0000 B6 00 00    	               ldaa COUNT
+  37 0003 4C          	               inca
+  38 0004 B7 00 00    	               staa COUNT
+  39 0007 3B          	xirqCount:     rti
+  40                 	
+  41                 	_start: 
+  42 0008 8E 00 00    	               lds #_stack    ; initialize SP
+  43                 	
+  44 000b 0E          	               cli
+  45 000c 7E 00 00    	loop:	       jmp loop
+  46                 	;-----------------------------------------
+  47                 	;         Data Area
+  48                 	
+  49                 	;-----------------------------------------
+  50 000f 00          	COUNT: .byte  0
+  51                 	
+  52                 	#set up dummy frame pointer
+  53                 	.global _.frame
+  54                 	_.frame: .word
+  55                 	
+  56                 	
+  57                 	.end
+M68HC11 GAS  irqA.s 			page 2
+
+

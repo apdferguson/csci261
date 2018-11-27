@@ -1,0 +1,200 @@
+M68HC11 GAS  wave.s 			page 1
+
+
+   1                 	;============================================-=
+   2                 	; File:
+   3                 	       .file "wave.s" 
+   4                 	; Behaviour: 
+   5                 	;      Generates a 1KHz square wave with a 40% duty cycle
+   6                 	;      using polling   (see text page 366)
+   7                 	; Assumptions:
+   8                 	;      none
+   9                 	; Board:
+  10                 	;      CME11-E9-EVBU
+  11                 	; Author/Date:
+  12                 	;      Peter Walsh Feb 2001
+  13                 	;      revised Feb 2002
+  14                 	;==========================================-=
+  15                 	
+  16                 	;----------------------------------------------
+  17                 	;            Text Section (code and data)
+  18                 	;----------------------------------------------
+  19                 	.sect .text 
+  20                 	.global _start
+  21                 	
+  22                 	set regbase, 0x1000
+  23                 	set porta, 0x0
+  24                 	set tcnt, 0x0e
+  25                 	set tflg1, 0x23
+  26                 	set tmsk1, 0x22
+  27                 	set tctl1, 0x20
+  28                 	set toc2, 0x18
+  29                 	
+  30                 	set highTicks, 600             ; 300 us
+  31                 	set lowTicks, 1400             ; 700 us
+  32                 	
+  33                 	set toggle, 0x40
+  34                 	set oc2, 0x40
+  35                 	set clear, 0x40
+  36                 	set oc2T, 0x00dc
+  37                 	set Jump, 0x7e
+  38                 	set oc2Sr, 0x00dd
+  39                 	
+  40                 	
+  41                 	
+  42                 	_start:
+  43 0000 0F          	  sei
+  44 0001 8E 00 00    	  lds #_stack
+  45                 	
+  46 0004 CE 00 00    		ldx #tickCheck
+  47 0007 FF 00 DD    	  stx oc2Sr
+  48 000a 86 7E       	  ldaa #Jump
+  49 000c B7 00 DC    	  staa oc2T
+  50                 	
+  51 000f CE 10 00    	  ldx #regbase
+  52                 	
+  53 0012 1C 00 40    	  bset porta,x oc2
+  54 0015 86 40       	  ldaa #toggle
+  55 0017 A7 20       	  staa tctl1,x
+  56                 	
+  57 0019 1C 22 40    	  bset tmsk1,x oc2
+M68HC11 GAS  wave.s 			page 2
+
+
+  58                 	
+  59 001c EC 0E       	  ldd tcnt,x
+  60 001e C3 02 58    	  addd #highTicks
+  61 0021 ED 18       	  std toc2,x
+  62                 	
+  63 0023 86 40       	  ldaa #clear
+  64 0025 A7 23       	  staa tflg1,x
+  65                 	
+  66                 	
+  67 0027 0E          	  cli
+  68                 	
+  69                 	
+  70 0028 7E 00 00    	mainloop: jmp mainloop
+  71                 	
+  72                 	tickCheck:
+  73 002b B6 00 00    		  ldaa LorH
+  74 002e BB 00 00    		  adda control
+  75 0031 27 13       		  beq high
+  76                 		  #bra low
+  77                 	
+  78                 	
+  79                 	low:
+  80 0033 86 40       		  ldaa #clear
+  81 0035 A7 23       		  staa tflg1,x
+  82 0037 EC 18       		  ldd toc2,x
+  83 0039 C3 02 58    		  addd #highTicks
+  84 003c ED 18       		  std toc2,x
+  85                 	
+  86 003e B6 00 00    		  ldaa control
+  87 0041 B7 00 00    		  staa LorH
+  88 0044 20 12       	    bra cleanup
+  89                 	
+  90                 	
+  91                 	high:
+  92 0046 86 40       		  ldaa #clear
+  93 0048 A7 23       		  staa tflg1,x
+  94                 	
+  95 004a EC 18       		  ldd toc2,x
+  96 004c C3 05 78    		  addd #lowTicks
+  97 004f ED 18       		  std toc2,x
+  98                 	
+  99 0051 B6 00 00    		  ldaa LorH
+ 100 0054 4C          		  inca
+ 101 0055 B7 00 00    		  staa LorH
+ 102                 	
+ 103                 	cleanup:
+ 104 0058 86 40       	  ldaa #clear
+ 105 005a A7 23       	  staa tflg1,x
+ 106 005c 3B          	  rti
+ 107                 	
+ 108 005d 00          	LorH: .byte 0
+ 109 005e 00          	control:  .byte 0
+ 110                 	
+ 111                 	#set up dummy frame pointer
+ 112                 	.global _.frame
+ 113                 	_.frame: .word
+ 114                 	
+M68HC11 GAS  wave.s 			page 3
+
+
+ 115                 	.end
+M68HC11 GAS  wave.s 			page 4
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 wave.s
+              wave.s:0      .text:0000000000000000 L0F0
+              wave.s:42     .text:0000000000000000 _start
+              wave.s:22     *ABS*:0000000000001000 regbase
+              wave.s:23     *ABS*:0000000000000000 porta
+              wave.s:24     *ABS*:000000000000000e tcnt
+              wave.s:25     *ABS*:0000000000000023 tflg1
+              wave.s:26     *ABS*:0000000000000022 tmsk1
+              wave.s:27     *ABS*:0000000000000020 tctl1
+              wave.s:28     *ABS*:0000000000000018 toc2
+              wave.s:30     *ABS*:0000000000000258 highTicks
+              wave.s:31     *ABS*:0000000000000578 lowTicks
+              wave.s:33     *ABS*:0000000000000040 toggle
+              wave.s:34     *ABS*:0000000000000040 oc2
+              wave.s:35     *ABS*:0000000000000040 clear
+              wave.s:36     *ABS*:00000000000000dc oc2T
+              wave.s:37     *ABS*:000000000000007e Jump
+              wave.s:38     *ABS*:00000000000000dd oc2Sr
+              wave.s:43     .text:0000000000000000 L0L0
+              wave.s:44     .text:0000000000000001 L0L1
+              wave.s:46     .text:0000000000000004 L0L2
+              wave.s:72     .text:000000000000002b tickCheck
+              wave.s:47     .text:0000000000000007 L0L3
+              wave.s:48     .text:000000000000000a L0L4
+              wave.s:49     .text:000000000000000c L0L5
+              wave.s:51     .text:000000000000000f L0L6
+              wave.s:53     .text:0000000000000012 L0L7
+              wave.s:54     .text:0000000000000015 L0L8
+              wave.s:55     .text:0000000000000017 L0L9
+              wave.s:57     .text:0000000000000019 L0L10
+              wave.s:59     .text:000000000000001c L0L11
+              wave.s:60     .text:000000000000001e L0L12
+              wave.s:61     .text:0000000000000021 L0L13
+              wave.s:63     .text:0000000000000023 L0L14
+              wave.s:64     .text:0000000000000025 L0L15
+              wave.s:67     .text:0000000000000027 L0L16
+              wave.s:70     .text:0000000000000028 mainloop
+              wave.s:70     .text:0000000000000028 L0L17
+              wave.s:73     .text:000000000000002b L0L18
+              wave.s:108    .text:000000000000005d LorH
+              wave.s:74     .text:000000000000002e L0L19
+              wave.s:109    .text:000000000000005e control
+              wave.s:75     .text:0000000000000031 L0L20
+              wave.s:91     .text:0000000000000046 high
+              wave.s:79     .text:0000000000000033 low
+              wave.s:80     .text:0000000000000033 L0L21
+              wave.s:81     .text:0000000000000035 L0L22
+              wave.s:82     .text:0000000000000037 L0L23
+              wave.s:83     .text:0000000000000039 L0L24
+              wave.s:84     .text:000000000000003c L0L25
+              wave.s:86     .text:000000000000003e L0L26
+              wave.s:87     .text:0000000000000041 L0L27
+              wave.s:88     .text:0000000000000044 L0L28
+              wave.s:103    .text:0000000000000058 cleanup
+              wave.s:92     .text:0000000000000046 L0L29
+              wave.s:93     .text:0000000000000048 L0L30
+M68HC11 GAS  wave.s 			page 5
+
+
+              wave.s:95     .text:000000000000004a L0L31
+              wave.s:96     .text:000000000000004c L0L32
+              wave.s:97     .text:000000000000004f L0L33
+              wave.s:99     .text:0000000000000051 L0L34
+              wave.s:100    .text:0000000000000054 L0L35
+              wave.s:101    .text:0000000000000055 L0L36
+              wave.s:104    .text:0000000000000058 L0L37
+              wave.s:105    .text:000000000000005a L0L38
+              wave.s:106    .text:000000000000005c L0L39
+              wave.s:113    .text:000000000000005f _.frame
+
+UNDEFINED SYMBOLS
+_stack

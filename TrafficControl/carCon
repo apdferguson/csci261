@@ -1,0 +1,71 @@
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+/*==================================================
+  Behaviour: Car controller Cycle Executive Example
+ 
+  Author: Peter Walsh Nov 1 2018
+  ==================================================*/
+
+#define TICK 2
+unsigned alarm(unsigned seconds);
+
+volatile sig_atomic_t new_minor_cycle = 0;
+
+/* The signal handler just clears the flag and re-enables itself. */
+void catch_alarm (int sig) {
+   signal (sig, catch_alarm);
+   alarm(TICK);
+   printf("-------> Tick (minor cycle) <--------------\n");
+   if (new_minor_cycle) {
+      printf("ERROR missed deadline \n");
+      exit(0);
+   } else {
+      new_minor_cycle = 1;
+   }
+}
+
+void speed (void) {
+   printf("Speed\n");
+   fflush(stdout);
+}
+
+void antilock (void) {
+   printf("ABS\n");
+   fflush(stdout);
+}
+
+void fuel (void) {
+   printf("Fuel\n");
+   fflush(stdout);
+}
+
+int main (void) {
+   /* Establish a handler for SIGALRM signals. */
+   signal (SIGALRM, catch_alarm);
+
+   /* Set an alarm. */
+   alarm (TICK);
+
+   while (1) {
+      printf("-----------> Start Major Cycle <--------------\n");
+      speed();
+      antilock();
+      new_minor_cycle = 0;
+      while (!new_minor_cycle);
+      speed();
+      fuel();
+      new_minor_cycle = 0;
+      while (!new_minor_cycle);
+      speed();
+      antilock();
+      new_minor_cycle = 0;
+      while (!new_minor_cycle);
+      speed();
+      new_minor_cycle = 0;
+      while (!new_minor_cycle);
+   }
+     
+   return(0);
+}
