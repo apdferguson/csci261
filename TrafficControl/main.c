@@ -54,7 +54,7 @@ void whereWePretendToDoOtherStuff(void){
   while(1){}
 }
 
-void tractorComin(void){
+void tractorComin(void){ //need to add 3 second timed yellow light for all transitions in program
   tflg1 = clear;
   if(fRd == 0){ //check to see if a car is already on the road
     toc2 = tcnt + threeSec;
@@ -63,7 +63,7 @@ void tractorComin(void){
     toc2 = tcnt + sevSec;
     fRd = 2;
   }else{
-    return; 
+    return;  
   }
 
 }
