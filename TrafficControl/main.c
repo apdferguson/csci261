@@ -54,6 +54,14 @@ void whereWePretendToDoOtherStuff(void){
   while(1){}
 }
 
+void Amber(void){
+  if(state == HG){
+    state = HY;
+  }else if(state == FG){
+    state = FY;
+  }
+}
+
 void tractorComin(void){ //need to add 3 second timed yellow light for all transitions in program
   tflg1 = clear;
   if(fRd == 0){ //check to see if a car is already on the road
@@ -62,10 +70,7 @@ void tractorComin(void){ //need to add 3 second timed yellow light for all trans
   }else if(fRd == 1){
     toc2 = tcnt + sevSec;
     fRd = 2;
-  }else{
-    return;  
   }
-
 }
 
 void highwayLighToggle(void){
@@ -74,8 +79,6 @@ void highwayLighToggle(void){
   }else if(highwayG == 1){
     highwayG = 0;
   }
-
-  return;
 }
 
 void highwayLightCheck(void){ //check to see if highway light has been green for 10 sec
@@ -85,14 +88,11 @@ void highwayLightCheck(void){ //check to see if highway light has been green for
   }else if(highwayG == 1){
     *(void(**)())0x00ef = tractorComin(); //change irq jump table
     tractorComin();
-  }else{
-    return;
   }
-
 }
 
 void setup(void){
-
+  state = HG;
   highwayG = 0;
    *(unsigned char *)0x00ee = jump; //set up irq jump table
    *(void(**)())0x00ef = highwayLightCheck;
